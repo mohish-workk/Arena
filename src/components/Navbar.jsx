@@ -4,7 +4,7 @@ import { ShoppingCart, User, Search, LogOut, X, Command, ArrowRight, Menu } from
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-    const { isLoggedIn, logout } = useAuth();
+    const { isLoggedIn, logout, isAdmin } = useAuth();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +60,9 @@ const Navbar = () => {
                     ))}
                     {isLoggedIn && (
                         <NavLink to="/dashboard" className={({ isActive }) => `text-[10px] uppercase font-bold tracking-widest transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-secondary/40'}`}>Dashboard</NavLink>
+                    )}
+                    {isLoggedIn && isAdmin && (
+                        <NavLink to="/admin/dashboard" className={({ isActive }) => `text-[10px] uppercase font-bold tracking-widest transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-secondary/40'}`}>Admin</NavLink>
                     )}
                 </div>
 

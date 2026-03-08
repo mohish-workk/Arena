@@ -11,9 +11,15 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Simulate login
-        login({ email });
-        navigate('/dashboard');
+        // Check for admin credentials
+        if (email === 'admin@gmail.com' && password === 'admin123') {
+            login({ email }, true);  // true = admin
+            navigate('/admin/dashboard');
+        } else {
+            // Normal login
+            login({ email });
+            navigate('/dashboard');
+        }
     };
 
     return (
@@ -40,7 +46,7 @@ const Login = () => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="name@ves.ac.in"
+                                placeholder="name@ves.ac.in or admin"
                                 className="w-full bg-cream border border-secondary/5 p-4 text-sm outline-none focus:border-primary transition-colors"
                             />
                         </div>
