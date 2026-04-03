@@ -6,9 +6,22 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        try {
+            const res = await fetch('/api/auth/forgotpassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error);
+            
+            setSubmitted(true);
+        } catch (error) {
+            alert(error.message || 'An error occurred during password reset');
+        }
     };
 
     return (

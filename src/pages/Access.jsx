@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react';
-import { rentalProducts } from '../data/dummyData';
+import { Link } from 'react-router-dom';
+import { rentalProducts, bundleProducts } from '../data/dummyData';
 import { Calendar, Shield, Zap, CheckCircle2, X, Info } from 'lucide-react';
+import BundleCard from '../components/BundleCard';
 
 const Access = () => {
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -30,29 +33,73 @@ const Access = () => {
         setEndDate('');
     };
 
+    const filteredRentalProducts = useMemo(() => {
+        if (!searchQuery) return rentalProducts;
+        return rentalProducts.filter(p => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            p.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery]);
+
     return (
         <div className="bg-cream min-h-screen pt-12 pb-24">
             <div className="max-w-7xl mx-auto px-8">
-                <header className="mb-16">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-primary text-cream text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">Premium Leasing</span>
-                        <span className="text-secondary/30 text-[10px] uppercase font-bold tracking-widest">seasonal</span>
+                <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-primary text-cream text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">Premium Leasing</span>
+                            <span className="text-secondary/30 text-[10px] uppercase font-bold tracking-widest">seasonal</span>
+                        </div>
+                        <h1 className="text-4xl font-bold tracking-tight text-secondary">Arena Access</h1>
+                        <p className="text-secondary/50 mt-2">Rent high-ticket gear. Adventure without the commitment.</p>
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight text-secondary">Arena Access</h1>
-                    <p className="text-secondary/50 mt-2">Rent high-ticket gear. Adventure without the commitment.</p>
+                    <div>
+                        <input 
+                            type="text" 
+                            placeholder="Search Rentals..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-b border-secondary/20 py-2 text-sm outline-none focus:border-primary transition-colors text-secondary placeholder:text-secondary/30 w-full md:w-64"
+                        />
+                    </div>
                 </header>
 
-                {/* Product Grid */}
+
+
+                {/* Pre-Bundled Kits Section */}
+                <div className="mb-24">
+                    <div className="flex items-center gap-4 mb-10">
+                        <h2 className="text-3xl font-bold tracking-tight text-secondary">Pre-Built Kits</h2>
+                        <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">Save up to 25%</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {bundleProducts.map(bundle => (
+                            <BundleCard 
+                                key={bundle.id} 
+                                bundle={bundle} 
+                                onAddToCart={(b) => {
+                                    // Handle adding individual items to cart mimicking Approach B
+                                    // In a production app, the cart context would handle this
+                                    alert(`Added ${b.name} (${b.items.length} items) to cart!`);
+                                }} 
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Individual Product Grid */}
+                <div className="mb-12">
+                    <h2 className="text-2xl font-bold tracking-tight text-secondary mb-8">Individual Gear</h2>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {rentalProducts.map(product => (
+                    {filteredRentalProducts.map(product => (
                         <div
                             key={product.id}
-                            onClick={() => setSelectedProduct(product)}
-                            className="bg-white border border-secondary/5 p-8 flex flex-col group relative overflow-hidden transition-all duration-500 hover:border-primary/20 cursor-pointer"
+                            className="bg-white border border-secondary/5 p-8 flex flex-col group relative overflow-hidden transition-all duration-500 hover:border-primary/20"
                         >
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:bg-primary/10 transition-colors"></div>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:bg-primary/10 transition-colors pointer-events-none"></div>
 
-                            <div className="mb-8">
+                            <Link to={`/product/${product.id}`} className="mb-8 block relative z-10 cursor-pointer">
                                 <div className="aspect-video overflow-hidden bg-cream mb-6">
                                     <img
                                         src={product.image}
@@ -60,11 +107,11 @@ const Access = () => {
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                 </div>
-                                <h3 className="text-2xl font-bold text-secondary mb-2 tracking-tight">{product.name}</h3>
+                                <h3 className="text-2xl font-bold text-secondary mb-2 tracking-tight group-hover:text-primary transition-colors">{product.name}</h3>
                                 <p className="text-sm text-secondary/50 line-clamp-2 leading-relaxed">
                                     {product.description}
                                 </p>
-                            </div>
+                            </Link>
 
                             <div className="flex-grow">
                                 <div className="grid grid-cols-1 gap-3 mb-8">
@@ -87,8 +134,15 @@ const Access = () => {
                                 </div>
                             </div>
 
-                            <div className="mt-8">
-                                <button className="w-full bg-primary text-cream py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md">
+                            <div className="mt-8 relative z-20">
+                                <button 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setSelectedProduct(product);
+                                    }}
+                                    className="w-full bg-primary text-cream py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-sm group-hover:shadow-md"
+                                >
                                     <Calendar size={14} /> Check Availability
                                 </button>
                             </div>

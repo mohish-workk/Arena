@@ -1,19 +1,30 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { retailProducts } from '../data/dummyData';
-import { ShoppingCart, X, Plus, SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { ShoppingCart, X, Plus, SlidersHorizontal, ChevronRight, Check } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 const Retail = () => {
     const [activeCategory, setActiveCategory] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const [showBundleModal, setShowBundleModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [addedProductId, setAddedProductId] = useState(null);
+    const { addToCart } = useCart();
 
     const categories = ['All', ...new Set(retailProducts.map(p => p.category))];
 
     const filteredProducts = useMemo(() => {
-        if (activeCategory === 'All') return retailProducts;
-        return retailProducts.filter(p => p.category === activeCategory);
-    }, [activeCategory]);
+        let products = retailProducts;
+        if (activeCategory !== 'All') {
+            products = products.filter(p => p.category === activeCategory);
+        }
+        if (searchQuery) {
+            products = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return products;
+    }, [activeCategory, searchQuery]);
 
     const handleAddToCart = (product) => {
         // For specific items like Cricket Bat, trigger the bundle modal
@@ -21,8 +32,9 @@ const Retail = () => {
             setSelectedProduct(product);
             setShowBundleModal(true);
         } else {
-            // Normal add to cart logic (mock)
-            alert(`${product.name} added to cart!`);
+            addToCart(product);
+            setAddedProductId(product.id);
+            setTimeout(() => setAddedProductId(null), 2000);
         }
     };
 
@@ -34,13 +46,22 @@ const Retail = () => {
                         <h1 className="text-4xl font-bold tracking-tight text-secondary uppercase italic">Arena Retail</h1>
                         <p className="text-secondary/50 mt-2 text-xs font-bold uppercase tracking-widest">Premium gear for the modern explorer.</p>
                     </div>
-                    <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className={`flex items-center gap-2 px-6 py-3 border transition-all text-[10px] font-bold uppercase tracking-widest ${isSidebarOpen ? 'bg-secondary text-cream border-secondary' : 'bg-transparent text-secondary border-secondary/10 hover:border-secondary'}`}
-                    >
-                        <SlidersHorizontal size={14} />
-                        {isSidebarOpen ? 'Hide Filters' : 'Show Filters'}
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                        <input 
+                            type="text" 
+                            placeholder="Search Retail..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-b border-secondary/20 py-2 text-sm outline-none focus:border-primary transition-colors text-secondary placeholder:text-secondary/30 w-64"
+                        />
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className={`flex items-center justify-center gap-2 px-6 py-3 border transition-all text-[10px] font-bold uppercase tracking-widest ${isSidebarOpen ? 'bg-secondary text-cream border-secondary' : 'bg-transparent text-secondary border-secondary/10 hover:border-secondary'}`}
+                        >
+                            <SlidersHorizontal size={14} />
+                            {isSidebarOpen ? 'Hide Filters' : 'Show Filters'}
+                        </button>
+                    </div>
                 </header>
 
                 <div className="flex gap-12 relative">
@@ -81,26 +102,38 @@ const Retail = () => {
                             {filteredProducts.map(product => (
                                 <div
                                     key={product.id}
-                                    className="group relative bg-white border border-secondary/5 rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                                    className="group relative bg-white border border-secondary/5 rounded-none flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
                                 >
-                                    <div className="aspect-[4/5] overflow-hidden bg-cream">
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                    </div>
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] uppercase tracking-widest text-primary font-bold">{product.category}</span>
-                                            <span className="text-sm font-medium text-secondary/60">₹{product.price}</span>
+                                    <Link to={`/product/${product.id}`} className="flex-grow block cursor-pointer">
+                                        <div className="aspect-[4/5] overflow-hidden bg-cream">
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            />
                                         </div>
-                                        <h4 className="text-lg font-bold text-secondary mb-4 leading-tight">{product.name}</h4>
+                                        <div className="p-6 pb-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-[10px] uppercase tracking-widest text-primary font-bold">{product.category}</span>
+                                                <span className="text-sm font-medium text-secondary/60">₹{product.price}</span>
+                                            </div>
+                                            <h4 className="text-lg font-bold text-secondary mb-0 leading-tight">{product.name}</h4>
+                                        </div>
+                                    </Link>
+                                    <div className="px-6 pb-6 pt-0 mt-auto">
                                         <button
-                                            onClick={() => handleAddToCart(product)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleAddToCart(product);
+                                            }}
                                             className="w-full bg-secondary text-cream py-3 rounded-none text-xs font-bold uppercase tracking-widest hover:bg-primary transition-colors flex items-center justify-center gap-2"
                                         >
-                                            <ShoppingCart size={14} /> Add to Cart
+                                            {addedProductId === product.id ? (
+                                                <><Check size={14} /> Added to Cart</>
+                                            ) : (
+                                                <><ShoppingCart size={14} /> Add to Cart</>
+                                            )}
                                         </button>
                                     </div>
                                 </div>

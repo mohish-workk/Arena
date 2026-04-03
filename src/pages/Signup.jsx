@@ -2,16 +2,41 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, ArrowRight, Mail, Lock, User } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 const Signup = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-    const { login } = useAuth();
+    const { register } = useAuth(); // Changed from login to register
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        login({ name: formData.name, email: formData.email });
-        navigate('/dashboard');
+        
+        // Sanitize
+        const sanitizedName = DOMPurify.sanitize(formData.name);
+        const sanitizedEmail = DOMPurify.sanitize(formData.email);
+        
+        // Validation
+        if (sanitizedName.trim().length < 2) {
+            alert("Please enter a valid name");
+            return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(sanitizedEmail)) {
+            alert("Invalid email format.");
+            return;
+        }
+        if (formData.password.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
+        }
+
+        const res = await register({ name: sanitizedName, email: sanitizedEmail, password: formData.password });
+        if (res.success) {
+            navigate('/dashboard');
+        } else {
+            alert(res.error || 'Server error occurred');
+        }
     };
 
     return (

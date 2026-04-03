@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
+
     return (
         <footer className="bg-secondary text-cream px-8 py-12 mt-auto">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
@@ -13,21 +16,23 @@ const Footer = () => {
                 <div>
                     <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Quick Links</h3>
                     <ul className="space-y-2 opacity-60 text-sm">
-                        <li><a href="/" className="hover:opacity-100 transition-opacity">Home</a></li>
-                        <li><a href="/retail" className="hover:opacity-100 transition-opacity">Retail Shop</a></li>
-                        <li><a href="/loop" className="hover:opacity-100 transition-opacity">Arena Loop</a></li>
-                        <li><a href="/access" className="hover:opacity-100 transition-opacity">Access (Rentals)</a></li>
+                        <li><Link to="/" className="hover:opacity-100 transition-opacity">Home</Link></li>
+                        <li><Link to="/retail" className="hover:opacity-100 transition-opacity">Retail Shop</Link></li>
+                        <li><Link to="/loop" className="hover:opacity-100 transition-opacity">Arena Loop</Link></li>
+                        <li><Link to="/access" className="hover:opacity-100 transition-opacity">Access (Rentals)</Link></li>
                     </ul>
+
                 </div>
 
                 <div>
                     <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Support</h3>
                     <ul className="space-y-2 opacity-60 text-sm">
-                        <li><a href="#" className="hover:opacity-100 transition-opacity">Trust & Safety</a></li>
-                        <li><a href="#" className="hover:opacity-100 transition-opacity">Shipping Policy</a></li>
-                        <li><a href="#" className="hover:opacity-100 transition-opacity">Returns</a></li>
-                        <li><a href="#" className="hover:opacity-100 transition-opacity">Contact Us</a></li>
+                        <li><Link to="#" className="hover:opacity-100 transition-opacity">Trust & Safety</Link></li>
+                        <li><Link to="/shipping" className="hover:opacity-100 transition-opacity">Shipping Policy</Link></li>
+                        <li><Link to="/returns" className="hover:opacity-100 transition-opacity">Returns</Link></li>
+                        <li><Link to="/contact" className="hover:opacity-100 transition-opacity">Contact Us</Link></li>
                     </ul>
+
                 </div>
 
                 <div>

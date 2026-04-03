@@ -98,3 +98,68 @@ export const rentalProducts = [
         description: 'Keep your devices charged anywhere in the wild.'
     }
 ];
+
+export const bundleProducts = [
+    {
+        id: 'b1',
+        name: 'The "Sahyadri Weekend" Bundle',
+        targetAudience: 'College groups heading out for a 2-day fort trek.',
+        description: 'Buying this setup costs upwards of ₹8,000. Renting the bundle for a weekend makes impulse trips highly affordable.',
+        coverImage: 'https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 15,
+        originalTotal: 400,
+        bundlePrice: 340,
+        items: [
+            { id: 'rt2', name: '50L Rucksack', quantity: 1, dailyRate: 100 },
+            { id: 'rt3', name: '2-Person Pop-up Tent', quantity: 1, dailyRate: 150 },
+            { id: 'rt4', name: 'Sleeping Bag', quantity: 2, dailyRate: 50 },
+            { id: 'rt5', name: 'LED Headlamp', quantity: 1, dailyRate: 50 }
+        ]
+    },
+    {
+        id: 'b2',
+        name: 'The "Turf Crusher" Pack',
+        targetAudience: 'Corporate teams or college friends booking local turf slots.',
+        description: 'Premium bats are expensive to own but highly desired for weekend matches.',
+        coverImage: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 20,
+        originalTotal: 500,
+        bundlePrice: 400,
+        items: [
+            { id: 'rt6', name: 'Premium English Willow Bat', quantity: 2, dailyRate: 150 },
+            { id: 'rt7', name: 'Batting Gloves', quantity: 1, dailyRate: 100 },
+            { id: 'rt8', name: 'Set of Spring Stumps', quantity: 1, dailyRate: 100 }
+        ]
+    },
+    {
+        id: 'b3',
+        name: 'The "Doubles Match" Kit',
+        targetAudience: 'Casual players hitting the indoor courts.',
+        description: 'Reduces the excuse of "I don\'t have a racket" when trying to organize a group game.',
+        coverImage: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 10,
+        originalTotal: 300,
+        bundlePrice: 270,
+        items: [
+            { id: 'rt9', name: 'Pro Racquets (Astrox)', quantity: 4, dailyRate: 50 },
+            { id: 'rt10', name: 'Nylon Shuttlecocks (Keep)', quantity: 1, dailyRate: 50 },
+            { id: 'rt11', name: 'Racquet Bag', quantity: 1, dailyRate: 50 }
+        ]
+    },
+    {
+        id: 'b4',
+        name: 'The "Content Creator" Action Pack',
+        targetAudience: 'Adventure vloggers and motorcycle riders.',
+        description: 'High-barrier entry cost. People only need action cameras for specific trips, making them the ultimate rental item.',
+        coverImage: 'https://images.unsplash.com/photo-1526170315873-3a56162824cf?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 25,
+        originalTotal: 200,
+        bundlePrice: 150,
+        items: [
+            { id: 'rt1', name: 'GoPro Hero 11 Black', quantity: 1, dailyRate: 100 },
+            { id: 'rt12', name: 'Chest + Helmet Mount', quantity: 1, dailyRate: 40 },
+            { id: 'rt13', name: 'Floating Handle', quantity: 1, dailyRate: 20 },
+            { id: 'rt14', name: 'Extra Battery', quantity: 1, dailyRate: 40 }
+        ]
+    }
+];

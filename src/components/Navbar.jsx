@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, X, Command, ArrowRight, Menu } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, X, Command, ArrowRight, Menu, Plus, Minus, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
     const { isLoggedIn, logout } = useAuth();
+    const { cartItems, cartCount, isCartOpen, toggleCart, removeFromCart, updateQuantity, cartTotal } = useCart();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -73,9 +75,13 @@ const Navbar = () => {
                         <Search size={18} />
                         <span className="hidden lg:block text-[9px] font-bold opacity-30 uppercase tracking-widest">Type /</span>
                     </button>
-                    <button title="Cart" className="text-secondary/60 hover:text-primary transition-colors relative">
+                    <button onClick={toggleCart} title="Cart" className="text-secondary/60 hover:text-primary transition-colors relative">
                         <ShoppingCart size={18} md:size={20} />
-                        <span className="absolute -top-1 -right-1 bg-primary text-cream text-[8px] md:text-[10px] w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-primary text-cream text-[8px] md:text-[10px] w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center font-bold">
+                                {cartCount}
+                            </span>
+                        )}
                     </button>
                     {isLoggedIn ? (
                         <div className="hidden md:flex items-center gap-4">
@@ -224,6 +230,87 @@ const Navbar = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cart Slide-over */}
+            {isCartOpen && (
+                <div className="fixed inset-0 z-[120] flex justify-end">
+                    <div className="absolute inset-0 bg-secondary/20 backdrop-blur-sm transition-opacity" onClick={toggleCart}></div>
+                    <div className="relative w-full max-w-md bg-cream shadow-2xl animate-in slide-in-from-right duration-500 h-full flex flex-col border-l border-secondary/10">
+                        {/* Cart Header */}
+                        <div className="p-8 border-b border-secondary/5 flex items-center justify-between shrink-0">
+                            <div>
+                                <h2 className="text-2xl font-bold text-secondary tracking-tight">Your Cart</h2>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-secondary/40">{cartCount} items</p>
+                            </div>
+                            <button onClick={toggleCart} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary/5 text-secondary/40 hover:text-secondary transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Cart Items */}
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                            {cartItems.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-secondary/30">
+                                    <ShoppingCart size={48} className="mb-4 opacity-50" />
+                                    <p className="text-sm font-medium">Your cart is empty</p>
+                                </div>
+                            ) : (
+                                cartItems.map(item => (
+                                    <div key={item.id} className="flex gap-4 p-4 bg-white border border-secondary/5 relative group">
+                                        <button
+                                            onClick={() => removeFromCart(item.id)}
+                                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                        <div className="w-20 h-20 bg-cream/50 shrink-0">
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover grayscale-[0.2]" />
+                                        </div>
+                                        <div className="flex-1 flex flex-col justify-between">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-secondary leading-tight line-clamp-2 pr-4">{item.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-primary">{item.category || 'Gear'}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between mt-2">
+                                                <span className="font-bold">₹{item.cartPrice}</span>
+                                                <div className="flex items-center gap-3 bg-cream px-2 py-1 border border-secondary/5">
+                                                    <button onClick={() => updateQuantity(item.id, -1)} className="text-secondary/40 hover:text-secondary">
+                                                        <Minus size={12} />
+                                                    </button>
+                                                    <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                                                    <button onClick={() => updateQuantity(item.id, 1)} className="text-secondary/40 hover:text-secondary">
+                                                        <Plus size={12} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Cart Footer */}
+                        {cartItems.length > 0 && (
+                            <div className="p-8 bg-white border-t border-secondary/5 shrink-0">
+                                <div className="flex justify-between items-end mb-6">
+                                    <span className="text-[10px] uppercase font-bold tracking-widest text-secondary/40">Subtotal</span>
+                                    <span className="text-2xl font-bold tracking-tighter text-secondary">₹{cartTotal}</span>
+                                </div>
+                                <Link
+                                    to="/checkout"
+                                    onClick={toggleCart}
+                                    className="w-full bg-primary text-cream py-5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <CreditCard size={14} /> Checkout Securely
+                                </Link>
+                                <p className="text-center mt-4 text-[10px] font-bold uppercase tracking-widest text-secondary/30 flex items-center justify-center gap-1">
+                                    Taxes calculated at checkout
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -2,18 +2,41 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, ArrowRight, Mail, Lock } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('admin@arena.com');
+    const [password, setPassword] = useState('admin123');
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Simulate login
-        login({ email });
-        navigate('/dashboard');
+        
+        // Sanitize
+        const sanitizedEmail = DOMPurify.sanitize(email);
+        
+        // Basic Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(sanitizedEmail)) {
+            alert("Invalid email format.");
+            return;
+        }
+        if (password.length < 6) {
+            alert("Password conceptually must be at least 6 characters.");
+            return;
+        }
+
+        const res = await login({ email: sanitizedEmail, password });
+        if (res.success) {
+            if (res.role === 'admin') {
+                navigate('/erp-crm');
+            } else {
+                navigate('/dashboard');
+            }
+        } else {
+            alert(res.error || 'Invalid credentials');
+        }
     };
 
     return (

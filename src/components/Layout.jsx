@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import ChatbotIcon from './ChatbotIcon';
+import CustomToast from './CustomToast';
 
 const Layout = () => {
     return (
@@ -9,6 +11,8 @@ const Layout = () => {
             <main className="flex-grow">
                 <Outlet />
             </main>
+            <ChatbotIcon />
+            <CustomToast />
             <Footer />
         </div>
     );
