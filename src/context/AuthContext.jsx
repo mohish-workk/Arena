@@ -17,9 +17,9 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify(userData)
             });
             const data = await res.json();
-            
+
             if (!res.ok) throw new Error(data.error);
-            
+
             setIsLoggedIn(true);
             setUser(data.user);
             sessionStorage.setItem('arena_token', data.token);
@@ -38,6 +38,13 @@ export const AuthProvider = ({ children }) => {
             return { success: true, role: 'admin' };
         }
 
+        if (userData.email === 'user@arena.com' && userData.password === 'user123') {
+            setIsLoggedIn(true);
+            setUser({ name: 'User System', email: 'User@arena.com', role: 'user' });
+            sessionStorage.setItem('arena_token', 'mock_user_token_xyz_123');
+            return { success: true, role: 'user' };
+        }
+
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -45,7 +52,7 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify(userData)
             });
             const data = await res.json();
-            
+
             if (!res.ok) throw new Error(data.error);
 
             setIsLoggedIn(true);

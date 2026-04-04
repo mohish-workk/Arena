@@ -57,8 +57,9 @@ const Dashboard = () => {
                             <button className="w-full sm:w-auto bg-cream text-primary px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-cream/90 transition-all shadow-xl">
                                 Top Up
                             </button>
-                            <button className="w-full sm:w-auto bg-transparent border border-cream/20 text-cream px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-cream hover:text-primary transition-all">
-                                Redeem
+                            <button 
+                            className="w-full sm:w-auto bg-transparent border border-cream/20 text-cream px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-cream hover:text-primary transition-all">
+                                <a href="./retail">Redeem</a>
                             </button>
                         </div>
                     </div>
@@ -77,9 +78,9 @@ const Dashboard = () => {
                                     }`}
                             >
                                 {tab === 'Rentals' && 'Active Rentals'}
-                                {tab === 'Listings' && 'My Loop Listings'}
+                                {/* {tab === 'Listings' && 'My Loop Listings'} */}
                                 {tab === 'History' && 'Order History'}
-                                {tab === 'Inventory' && <span className="flex items-center gap-2"><Database size={12} /> Asset Ledger</span>}
+                                {/* {tab === 'Inventory' && <span className="flex items-center gap-2"><Database size={12} /> Asset Ledger</span>} */}
                                 {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>}
                             </button>
                         ))}
