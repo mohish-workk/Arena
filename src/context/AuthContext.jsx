@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -8,43 +8,94 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // Mock login function
-    const login = (userData, admin = false) => {
-        setIsLoggedIn(true);
-        setIsAdmin(admin);
-        setUser({
-            name: admin ? 'Admin User' : 'Mohish Padave',
-            email: admin ? 'admin@arenaone.com' : 'mohish.padave@ves.ac.in',
-            ...userData
-        });
-        localStorage.setItem('arena_auth', 'true');
-        if (admin) localStorage.setItem('arena_admin', 'true');
+    // Real authentication using backend
+    const register = async (userData) => {
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error);
+            
+            setIsLoggedIn(true);
+            setUser(data.user);
+            sessionStorage.setItem('arena_token', data.token);
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    };
+
+    const login = async (userData) => {
+        // QUICK BYPASS DUMMY CREDENTIALS
+        if (userData.email === 'admin@arena.com' && userData.password === 'admin123') {
+            setIsLoggedIn(true);
+            setUser({ name: 'Admin System', email: 'admin@arena.com', role: 'admin' });
+            sessionStorage.setItem('arena_token', 'mock_admin_token_xyz_123');
+            return { success: true, role: 'admin' };
+        }
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error);
+
+            setIsLoggedIn(true);
+            setUser(data.user);
+            sessionStorage.setItem('arena_token', data.token);
+            return { success: true, role: data.user.role };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
     };
 
     const logout = () => {
         setIsLoggedIn(false);
         setIsAdmin(false);
         setUser(null);
-        localStorage.removeItem('arena_auth');
-        localStorage.removeItem('arena_admin');
+        sessionStorage.removeItem('arena_token');
     };
 
-    // Check for existing session
+    // Check for existing session token
     useEffect(() => {
-        const session = localStorage.getItem('arena_auth');
-        const adminSession = localStorage.getItem('arena_admin');
-        if (session) {
-            setIsLoggedIn(true);
-            setIsAdmin(!!adminSession);
-            setUser({
-                name: adminSession ? 'Admin User' : 'Mohish Padave',
-                email: adminSession ? 'admin@arenaone.com' : 'mohish.padave@ves.ac.in'
-            });
+        const token = sessionStorage.getItem('arena_token');
+        if (token) {
+            try {
+                // Correctly extract and decode the JWT payload (2nd part)
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(window.atob(base64));
+
+                // JWT 'exp' is in seconds, Date.now() is in milliseconds
+                if (payload.exp * 1000 > Date.now()) {
+                    setIsLoggedIn(true);
+                    setUser({
+                        id: payload.id,
+                        name: payload.name || 'User',
+                        email: payload.email || 'user@ves.ac.in',
+                        role: payload.role || 'user'
+                    });
+                } else {
+                    // Token expired
+                    sessionStorage.removeItem('arena_token');
+                }
+            } catch (e) {
+                console.error("Session restoration failed:", e);
+                sessionStorage.removeItem('arena_token');
+            }
         }
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, user, isAdmin, login, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -99,102 +99,67 @@ export const rentalProducts = [
     }
 ];
 
-// src/data/dummyData.js (append to existing)
-export const orders = [
+export const bundleProducts = [
     {
-        id: 'ORD-001',
-        customer: 'Rahul Sharma',
-        date: '2026-03-01',
-        status: 'Delivered',
-        total: 4500,
-        items: ['Pro Performance Cricket Bat'],
-        paymentMethod: 'Card'
+        id: 'b1',
+        name: 'The "Sahyadri Weekend" Bundle',
+        targetAudience: 'College groups heading out for a 2-day fort trek.',
+        description: 'Buying this setup costs upwards of ₹8,000. Renting the bundle for a weekend makes impulse trips highly affordable.',
+        coverImage: 'https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 15,
+        originalTotal: 400,
+        bundlePrice: 340,
+        items: [
+            { id: 'rt2', name: '50L Rucksack', quantity: 1, dailyRate: 100 },
+            { id: 'rt3', name: '2-Person Pop-up Tent', quantity: 1, dailyRate: 150 },
+            { id: 'rt4', name: 'Sleeping Bag', quantity: 2, dailyRate: 50 },
+            { id: 'rt5', name: 'LED Headlamp', quantity: 1, dailyRate: 50 }
+        ]
     },
     {
-        id: 'ORD-002',
-        customer: 'Sneha Patel',
-        date: '2026-03-02',
-        status: 'Processing',
-        total: 1200,
-        items: ['Eco-Grip Yoga Mat'],
-        paymentMethod: 'Credits'
+        id: 'b2',
+        name: 'The "Turf Crusher" Pack',
+        targetAudience: 'Corporate teams or college friends booking local turf slots.',
+        description: 'Premium bats are expensive to own but highly desired for weekend matches.',
+        coverImage: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 20,
+        originalTotal: 500,
+        bundlePrice: 400,
+        items: [
+            { id: 'rt6', name: 'Premium English Willow Bat', quantity: 2, dailyRate: 150 },
+            { id: 'rt7', name: 'Batting Gloves', quantity: 1, dailyRate: 100 },
+            { id: 'rt8', name: 'Set of Spring Stumps', quantity: 1, dailyRate: 100 }
+        ]
     },
     {
-        id: 'ORD-003',
-        customer: 'Aman Verma',
-        date: '2026-03-03',
-        status: 'Shipped',
-        total: 3200,
-        items: ['Alpine Explorer Tent'],
-        paymentMethod: 'UPI'
+        id: 'b3',
+        name: 'The "Doubles Match" Kit',
+        targetAudience: 'Casual players hitting the indoor courts.',
+        description: 'Reduces the excuse of "I don\'t have a racket" when trying to organize a group game.',
+        coverImage: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 10,
+        originalTotal: 300,
+        bundlePrice: 270,
+        items: [
+            { id: 'rt9', name: 'Pro Racquets (Astrox)', quantity: 4, dailyRate: 50 },
+            { id: 'rt10', name: 'Nylon Shuttlecocks (Keep)', quantity: 1, dailyRate: 50 },
+            { id: 'rt11', name: 'Racquet Bag', quantity: 1, dailyRate: 50 }
+        ]
     },
     {
-        id: 'ORD-004',
-        customer: 'Priya Singh',
-        date: '2026-03-04',
-        status: 'Pending',
-        total: 1500,
-        items: ['Premium Climbing Harness'],
-        paymentMethod: 'Card'
-    },
-    {
-        id: 'ORD-005',
-        customer: 'Karan Mehta',
-        date: '2026-03-05',
-        status: 'Cancelled',
-        total: 800,
-        items: ['Vintage Leather Cricket Ball'],
-        paymentMethod: 'Credits'
-    }
-];
-
-export const inventory = [
-    {
-        id: 'INV-001',
-        name: 'Pro Performance Cricket Bat',
-        category: 'Cricket',
-        stock: 15,
-        threshold: 5,
-        status: 'In Stock'
-    },
-    {
-        id: 'INV-002',
-        name: 'Signature Surf Wax - Tropical',
-        category: 'Surfing',
-        stock: 3,
-        threshold: 5,
-        status: 'Low Stock'
-    },
-    {
-        id: 'INV-003',
-        name: 'Alpine Explorer Tent',
-        category: 'Camping',
-        stock: 0,
-        threshold: 2,
-        status: 'Out of Stock'
-    },
-    {
-        id: 'INV-004',
-        name: 'Precision Climbing Harness',
-        category: 'Climbing',
-        stock: 8,
-        threshold: 3,
-        status: 'In Stock'
-    },
-    {
-        id: 'INV-005',
-        name: 'Carbon Fiber Road Bike',
-        category: 'Cycling',
-        stock: 1,
-        threshold: 2,
-        status: 'Low Stock'
-    },
-    {
-        id: 'INV-006',
-        name: 'GoPro Hero 11 Black',
-        category: 'Electronics',
-        stock: 0,
-        threshold: 1,
-        status: 'Out of Stock'
+        id: 'b4',
+        name: 'The "Content Creator" Action Pack',
+        targetAudience: 'Adventure vloggers and motorcycle riders.',
+        description: 'High-barrier entry cost. People only need action cameras for specific trips, making them the ultimate rental item.',
+        coverImage: 'https://images.unsplash.com/photo-1526170315873-3a56162824cf?auto=format&fit=crop&q=80&w=800',
+        discountPercentage: 25,
+        originalTotal: 200,
+        bundlePrice: 150,
+        items: [
+            { id: 'rt1', name: 'GoPro Hero 11 Black', quantity: 1, dailyRate: 100 },
+            { id: 'rt12', name: 'Chest + Helmet Mount', quantity: 1, dailyRate: 40 },
+            { id: 'rt13', name: 'Floating Handle', quantity: 1, dailyRate: 20 },
+            { id: 'rt14', name: 'Extra Battery', quantity: 1, dailyRate: 40 }
+        ]
     }
 ];

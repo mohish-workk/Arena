@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { loopProducts } from '../data/dummyData';
-import { ShieldCheck, CheckCircle2, Star, ArrowDownRight, X, IndianRupee, Send } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, CheckCircle2, Star, ArrowDownRight, X, IndianRupee, Send, ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 const Loop = () => {
-    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [offerAmount, setOfferAmount] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [addedProductId, setAddedProductId] = useState(null);
+    const { addToCart } = useCart();
 
     const handleBuyNow = (product) => {
-        navigate('/checkout', { state: { product } });
+        addToCart(product);
+        setAddedProductId(product.id);
+        setTimeout(() => setAddedProductId(null), 2000);
     };
 
     const openOfferModal = (product) => {
@@ -31,20 +35,39 @@ const Loop = () => {
         }, 2500);
     };
 
+    const filteredLoopProducts = useMemo(() => {
+        if (!searchQuery) return loopProducts;
+        return loopProducts.filter(p => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            p.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery]);
+
     return (
         <div className="bg-cream min-h-screen pt-12 pb-24">
             <div className="max-w-7xl mx-auto px-8">
-                <header className="mb-16">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">Student Economy</span>
-                        <span className="text-secondary/30 text-[10px] uppercase font-bold tracking-widest">Verified Marketplace</span>
+                <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">Student Economy</span>
+                            <span className="text-secondary/30 text-[10px] uppercase font-bold tracking-widest">Verified Marketplace</span>
+                        </div>
+                        <h1 className="text-4xl font-bold tracking-tight text-secondary">Arena Loop</h1>
+                        <p className="text-secondary/50 mt-2">Verified student resale. Buy and sell with total confidence.</p>
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight text-secondary">Arena Loop</h1>
-                    <p className="text-secondary/50 mt-2">Verified student resale. Buy and sell with total confidence.</p>
+                    <div>
+                        <input 
+                            type="text" 
+                            placeholder="Search Loop..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-b border-secondary/20 py-2 text-sm outline-none focus:border-primary transition-colors text-secondary placeholder:text-secondary/30 w-full md:w-64"
+                        />
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {loopProducts.map(product => (
+                    {filteredLoopProducts.map(product => (
                         <div key={product.id} className="bg-white border border-secondary/5 flex flex-col sm:flex-row overflow-hidden group transition-all duration-300 hover:shadow-xl">
                             {/* Image Section */}
                             <div className="sm:w-2/5 aspect-square sm:aspect-auto overflow-hidden bg-cream relative">
@@ -110,9 +133,13 @@ const Loop = () => {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => handleBuyNow(product)}
-                                            className="flex-grow bg-primary text-cream py-4 rounded-none text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-md"
+                                            className="flex-grow bg-primary text-cream py-4 rounded-none text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2"
                                         >
-                                            Buy Now
+                                            {addedProductId === product.id ? (
+                                                <><Check size={14} /> Added to Cart</>
+                                            ) : (
+                                                <><ShoppingCart size={14} /> Add to Cart</>
+                                            )}
                                         </button>
                                         <button
                                             onClick={() => openOfferModal(product)}

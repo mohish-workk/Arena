@@ -1,10 +1,80 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ShoppingBag, RefreshCcw, Key, X, ShieldCheck, CheckCircle2, MapPin, Mail } from 'lucide-react';
+import { ShoppingBag, RefreshCcw, Key, ArrowRight, Star } from 'lucide-react';
+import { retailProducts, loopProducts, rentalProducts } from '../data/dummyData';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const ProductCard = ({ product, type }) => {
+    const isRental = type === 'rental';
+    const isLoop = type === 'loop';
+
+    return (
+        <Link 
+            to={`/product/${product.id}`}
+            className="group block bg-white border border-secondary/5 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+        >
+            <div className="aspect-[4/5] overflow-hidden bg-cream relative">
+                <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                {isLoop && (
+                    <div className="absolute top-4 left-4 bg-primary text-cream text-[8px] font-bold px-2 py-1 uppercase tracking-widest">
+                        {product.condition} Condition
+                    </div>
+                )}
+            </div>
+            <div className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
+                        {product.category || (isLoop ? 'Loop' : 'Gear')}
+                    </span>
+                    {isLoop && (
+                        <div className="flex items-center gap-1 text-primary">
+                            <Star size={8} fill="currentColor" />
+                            <span className="text-[8px] font-bold">{product.trustScore}</span>
+                        </div>
+                    )}
+                </div>
+                <h4 className="font-bold text-secondary mb-4 leading-tight group-hover:text-primary transition-colors line-clamp-1">
+                    {product.name}
+                </h4>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-bold text-secondary">
+                        ₹{product.price || product.depreciatedPrice || product.dailyRate}
+                    </span>
+                    {isRental && (
+                        <span className="text-[10px] opacity-40 uppercase font-bold">/ Day</span>
+                    )}
+                    {isLoop && (
+                        <span className="text-[10px] opacity-40 line-through font-bold">
+                            ₹{product.originalPrice}
+                        </span>
+                    )}
+                </div>
+            </div>
+        </Link>
+    );
+};
+
+const SectionHeader = ({ title, link, linkText = 'View All' }) => (
+    <div className="flex justify-between items-end mb-12">
+        <div>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-primary font-bold mb-2">Collection</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight uppercase italic">{title}</h2>
+        </div>
+        <Link 
+            to={link} 
+            className="group flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.2em] hover:text-primary transition-colors"
+        >
+            {linkText} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+    </div>
+);
 
 const Home = () => {
     const navigate = useNavigate();
@@ -12,15 +82,8 @@ const Home = () => {
     const imageRef = useRef(null);
     const textRef = useRef(null);
 
-    // Eligibility Modal State
-    const [isElModalOpen, setIsElModalOpen] = useState(false);
-    const [elEmail, setElEmail] = useState('');
-    const [isElLoading, setIsElLoading] = useState(false);
-    const [elStep, setElStep] = useState(1); // 1: input, 2: success, 3: fail
-
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Hero Image Animation
             gsap.fromTo(
                 imageRef.current,
                 { scale: 1.1, opacity: 0.8 },
@@ -36,7 +99,6 @@ const Home = () => {
                 }
             );
 
-            // Hero Text Animation
             gsap.fromTo(
                 textRef.current,
                 { y: 50, opacity: 0 },
@@ -52,28 +114,6 @@ const Home = () => {
 
         return () => ctx.revert();
     }, []);
-
-    const handleCheckEligibility = (e) => {
-        e.preventDefault();
-        setIsElLoading(true);
-
-        // Simulate checking process
-        setTimeout(() => {
-            setIsElLoading(false);
-            if (elEmail.toLowerCase().endsWith('@ves.ac.in')) {
-                setElStep(2);
-            } else {
-                setElStep(3);
-            }
-        }, 2000);
-    };
-
-    const resetElModal = () => {
-        setIsElModalOpen(false);
-        setElEmail('');
-        setElStep(1);
-        setIsElLoading(false);
-    };
 
     return (
         <div className="bg-cream min-h-screen">
@@ -151,170 +191,169 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* Product Showcases */}
+            <section className="py-24 px-8 max-w-7xl mx-auto border-t border-secondary/5">
+                <SectionHeader title="Arena Retail" link="/retail" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {retailProducts.slice(0, 4).map(product => (
+                        <ProductCard key={product.id} product={product} type="retail" />
+                    ))}
+                </div>
+            </section>
+
+            <section className="py-24 px-8 max-w-7xl mx-auto border-t border-secondary/5">
+                <SectionHeader title="Arena Loop" link="/loop" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {loopProducts.slice(0, 4).map(product => (
+                        <ProductCard key={product.id} product={product} type="loop" />
+                    ))}
+                </div>
+            </section>
+
+            <section className="py-24 px-8 max-w-7xl mx-auto border-t border-secondary/5">
+                <SectionHeader title="Arena Access" link="/access" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {rentalProducts.slice(0, 4).map(product => (
+                        <ProductCard key={product.id} product={product} type="rental" />
+                    ))}
+                </div>
+            </section>
+
             {/* Testimonials Section */}
-            <section className="py-24 bg-secondary text-cream overflow-hidden">
+            <section className="py-24 bg-primary text-cream overflow-hidden border-t border-primary/10">
                 <div className="max-w-7xl mx-auto px-8">
                     <header className="mb-16">
-                        <p className="text-[10px] uppercase tracking-[0.4em] text-primary font-bold mb-4">Real stories</p>
-                        <h2 className="text-4xl font-bold tracking-tight uppercase italic">Voice of the Campus.</h2>
+                        <p className="text-[10px] uppercase tracking-[0.4em] text-cream font-bold mb-4">Real stories</p>
+                        <h2 className="text-4xl font-bold tracking-tight uppercase italic text-cream">Voice of the Campus.</h2>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {[
-                            {
-                                name: "Rahul S.",
-                                year: "Final Year IT",
-                                quote: "Arena Loop saved me ₹5000 on my cricket kit. The verification process makes it so much safer than generic marketplaces.",
-                                highlight: "₹5000 Saved"
-                            },
-                            {
-                                name: "Sneha K.",
-                                year: "FE Computer Science",
-                                quote: "I rented a DSLR for our class trip. The delivery was right to my hostel gate. Super convenient!",
-                                highlight: "Instant Delivery"
-                            },
-                            {
-                                name: "Aman P.",
-                                year: "TE Automation",
-                                quote: "Sold my old semester books in 15 minutes. Arena One is exactly what our campus needed.",
-                                highlight: "15 Min Sale"
-                            },
-                            {
-                                name: "Priya M.",
-                                year: "SE Electronics",
-                                quote: "The quality of retail gear is top-notch. It's great to have a premium store that understands student life.",
-                                highlight: "Top Quality"
-                            }
-                        ].map((t, i) => (
-                            <div key={i} className="bg-white/5 border border-white/10 p-8 flex flex-col justify-between hover:bg-white/10 transition-all duration-500 group">
-                                <div>
-                                    <div className="text-[9px] font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
-                                        <div className="w-1 h-1 bg-primary"></div>
-                                        {t.highlight}
-                                    </div>
-                                    <p className="text-sm leading-relaxed mb-8 italic opacity-70 group-hover:opacity-100 transition-opacity">
-                                        "{t.quote}"
-                                    </p>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold tracking-tight">{t.name}</h4>
-                                    <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">{t.year}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Campus Banner */}
-            <section className="px-6 py-16 md:px-8 md:pt-32 md:pb-24">
-                <div className="bg-[#1A3C34] py-10 px-8 md:py-12 md:px-24 rounded-none flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
-                    {/* Subtle geometric overlay */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-cream/5 rounded-full -mr-20 -mt-20"></div>
-
-                    <div className="relative z-10 text-cream text-center md:text-left">
-                        <p className="text-[10px] uppercase tracking-[0.3em] opacity-60 mb-2 font-bold">Campus Exclusive</p>
-                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-tight">
-                            VESIT Campus Exclusive: <br className="hidden md:block" />
-                            <span className="text-cream/80">&lt; 2 Hour Dorm Delivery.</span>
-                        </h2>
-                    </div>
-
-                    <div className="relative z-10 w-full md:w-auto">
-                        <button
-                            onClick={() => setIsElModalOpen(true)}
-                            className="w-full md:w-auto bg-cream text-primary px-10 py-4 rounded-none text-sm font-bold uppercase tracking-widest hover:bg-cream/90 transition-all shadow-xl"
-                        >
-                            Check Eligibility
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* Eligibility Modal */}
-            {isElModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-8 bg-secondary/90 backdrop-blur-md">
-                    <div className="bg-white w-full max-w-lg relative shadow-2xl overflow-hidden border border-secondary/5">
-                        <button
-                            onClick={resetElModal}
-                            className="absolute top-6 right-6 text-secondary/40 hover:text-secondary transition-colors z-20"
-                        >
-                            <X size={20} />
-                        </button>
-
-                        <div className="p-12">
-                            {elStep === 1 ? (
-                                <>
-                                    <header className="mb-10 text-center">
-                                        <div className="w-16 h-16 bg-primary/5 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                                            <MapPin size={28} />
+                    <div className="relative w-full overflow-hidden flex">
+                        <div className="flex animate-marquee w-max gap-8 px-4">
+                            {[
+                                {
+                                    name: "Rahul S.",
+                                    quote: "Arena Loop saved me ₹5000 on my cricket kit. The verification process makes it so much safer than generic marketplaces.",
+                                    highlight: "₹5000 Saved"
+                                },
+                                {
+                                    name: "Sneha K.",
+                                    quote: "I rented a DSLR for our class trip. The delivery was right to my hostel gate. Super convenient!",
+                                    highlight: "Instant Delivery"
+                                },
+                                {
+                                    name: "Aman P.",
+                                    quote: "Sold my old semester books in 15 minutes. Arena One is exactly what our campus needed.",
+                                    highlight: "15 Min Sale"
+                                },
+                                {
+                                    name: "Priya M.",
+                                    quote: "The quality of retail gear is top-notch. It's great to have a premium store that understands student life.",
+                                    highlight: "Top Quality"
+                                },
+                                // Duplicating for seamless marquee effect
+                                {
+                                    name: "Rahul S.",
+                                    quote: "Arena Loop saved me ₹5000 on my cricket kit. The verification process makes it so much safer than generic marketplaces.",
+                                    highlight: "₹5000 Saved"
+                                },
+                                {
+                                    name: "Sneha K.",
+                                    quote: "I rented a DSLR for our class trip. The delivery was right to my hostel gate. Super convenient!",
+                                    highlight: "Instant Delivery"
+                                },
+                                {
+                                    name: "Aman P.",
+                                    quote: "Sold my old semester books in 15 minutes. Arena One is exactly what our campus needed.",
+                                    highlight: "15 Min Sale"
+                                },
+                                {
+                                    name: "Priya M.",
+                                    quote: "The quality of retail gear is top-notch. It's great to have a premium store that understands student life.",
+                                    highlight: "Top Quality"
+                                }
+                            ].map((t, i) => (
+                                <div key={i} className="bg-white/5 border border-white/10 p-8 flex flex-col justify-between hover:bg-white/10 transition-all duration-500 group w-[350px] shrink-0">
+                                    <div>
+                                        <div className="text-[9px] font-bold uppercase tracking-widest text-cream mb-6 flex items-center gap-2">
+                                            <div className="w-1 h-1 bg-cream"></div>
+                                            {t.highlight}
                                         </div>
-                                        <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-2 block">Location Verification</span>
-                                        <h2 className="text-3xl font-bold text-secondary tracking-tight">Check Eligibility</h2>
-                                        <p className="text-secondary/40 text-xs mt-2">Enter your campus email to verify 2-hour delivery.</p>
-                                    </header>
-
-                                    <form onSubmit={handleCheckEligibility} className="space-y-6">
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] uppercase font-bold tracking-widest text-secondary/40 flex items-center gap-2">
-                                                <Mail size={12} /> University Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                required
-                                                placeholder="name@ves.ac.in"
-                                                value={elEmail}
-                                                onChange={(e) => setElEmail(e.target.value)}
-                                                className="w-full bg-cream border border-secondary/5 p-5 text-sm outline-none focus:border-primary transition-colors"
-                                            />
-                                        </div>
-
-                                        <button
-                                            disabled={isElLoading}
-                                            type="submit"
-                                            className="w-full bg-primary text-cream py-5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-3"
-                                        >
-                                            {isElLoading ? 'Verifying Coordinates...' : 'Verify My Campus'}
-                                        </button>
-                                    </form>
-                                </>
-                            ) : elStep === 2 ? (
-                                <div className="text-center py-8">
-                                    <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-8">
-                                        <CheckCircle2 size={40} />
+                                        <p className="text-sm leading-relaxed mb-8 italic opacity-70 group-hover:opacity-100 transition-opacity">
+                                            "{t.quote}"
+                                        </p>
                                     </div>
-                                    <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 text-center">You're Eligible!</h2>
-                                    <p className="text-secondary/50 text-sm leading-relaxed mb-10 text-center">
-                                        VESIT is part of our **Elite Campus Network**. You can now enjoy sub-2 hour deliveries on all retail orders.
-                                    </p>
-                                    <button
-                                        onClick={resetElModal}
-                                        className="w-full bg-primary text-cream py-5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl"
-                                    >
-                                        Start Shopping Retail
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
-                                        <ShieldCheck size={40} />
+                                    <div>
+                                        <h4 className="text-sm font-bold tracking-tight">{t.name}</h4>
+                                        <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Arena Customer</p>
                                     </div>
-                                    <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 text-center">Out of Range</h2>
-                                    <p className="text-secondary/50 text-sm leading-relaxed mb-10 text-center">
-                                        Currently, 2-hour delivery is exclusive to the **@ves.ac.in** community. Stay tuned as we expand to other campuses.
-                                    </p>
-                                    <button
-                                        onClick={() => setElStep(1)}
-                                        className="w-full bg-secondary text-cream py-5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl"
-                                    >
-                                        Try Another Email
-                                    </button>
                                 </div>
-                            )}
+                            ))}
                         </div>
                     </div>
                 </div>
-            )}
+            </section>
+224: 
+            {/* Product Request Section */}
+            <section className="py-24 bg-cream overflow-hidden">
+                <div className="max-w-4xl mx-auto px-8">
+                    <div className="bg-secondary p-12 md:p-16 relative overflow-hidden group">
+                        {/* Ambient glow */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 -mr-32 -mt-32 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
+                        
+                        <div className="relative z-10">
+                            <header className="mb-10">
+                                <p className="text-[10px] uppercase tracking-[0.4em] text-primary font-bold mb-4">Request Gear</p>
+                                <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-cream leading-tight">
+                                    Can't find what you're <br/> looking for?
+                                </h2>
+                                <p className="text-cream/50 mt-6 text-sm md:text-md max-w-xl leading-relaxed">
+                                    Is there some product from any company that you want but we don't have? 
+                                    Write details and we will find it and make it available for you.
+                                </p>
+                            </header>
+
+                            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Request received! We'll find it for you."); }}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold tracking-widest text-cream/40">Product Name / Brand</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. Wilson Pro Staff v14"
+                                            className="w-full bg-white/5 border border-white/10 p-4 text-sm text-cream outline-none focus:border-primary transition-colors placeholder:text-cream/20"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold tracking-widest text-cream/40">Your Email</label>
+                                        <input 
+                                            type="email" 
+                                            placeholder="your@email.com"
+                                            className="w-full bg-white/5 border border-white/10 p-4 text-sm text-cream outline-none focus:border-primary transition-colors placeholder:text-cream/20"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] uppercase font-bold tracking-widest text-cream/40">Specific Details (Size, Color, Model)</label>
+                                    <textarea 
+                                        rows="3"
+                                        placeholder="Tell us everything about the product..."
+                                        className="w-full bg-white/5 border border-white/10 p-4 text-sm text-cream outline-none focus:border-primary transition-colors placeholder:text-cream/20 resize-none"
+                                        required
+                                    ></textarea>
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="bg-primary text-cream px-10 py-5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all flex items-center gap-3 shadow-2xl"
+                                >
+                                    Submit Request <ArrowRight size={16} />
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
     );
 };
