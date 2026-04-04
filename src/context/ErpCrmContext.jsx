@@ -11,7 +11,7 @@ export const useErpCrm = () => {
 };
 
 export const ErpCrmProvider = ({ children }) => {
-    const { user } = useAuth();
+const { user, earnCredits } = useAuth();
     
     const [erpProducts, setErpProducts] = useState(() => {
         const saved = localStorage.getItem('arena_erp_products');
@@ -165,6 +165,7 @@ export const ErpCrmProvider = ({ children }) => {
                 };
                 next.push(crmUser);
             }
+            earnCredits?.(cartTotal);
             return next;
         });
 

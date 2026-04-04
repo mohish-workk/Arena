@@ -33,14 +33,14 @@ export const AuthProvider = ({ children }) => {
         // QUICK BYPASS DUMMY CREDENTIALS
         if (userData.email === 'admin@arena.com' && userData.password === 'admin123') {
             setIsLoggedIn(true);
-            setUser({ name: 'Admin System', email: 'admin@arena.com', role: 'admin' });
+setUser({ name: 'Admin System', email: 'admin@arena.com', role: 'admin', arenaCredits: 0 });
             sessionStorage.setItem('arena_token', 'mock_admin_token_xyz_123');
             return { success: true, role: 'admin' };
         }
 
         if (userData.email === 'user@arena.com' && userData.password === 'user123') {
             setIsLoggedIn(true);
-            setUser({ name: 'User System', email: 'User@arena.com', role: 'user' });
+setUser({ name: 'User System', email: 'User@arena.com', role: 'user', arenaCredits: 20 });
             sessionStorage.setItem('arena_token', 'mock_user_token_xyz_123');
             return { success: true, role: 'user' };
         }
@@ -64,16 +64,52 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+const logout = () => {
         setIsLoggedIn(false);
         setIsAdmin(false);
         setUser(null);
         sessionStorage.removeItem('arena_token');
+        sessionStorage.removeItem('arena_user_state');
+    };
+
+    const getRedeemableValue = () => user?.arenaCredits || 0;
+
+    const earnCredits = (amount) => {
+        if (!user || user.role !== 'user') return 0;
+        const earned = Math.floor(amount / 125) * 10;
+        const newCredits = (user.arenaCredits || 0) + earned;
+        const newUser = { ...user, arenaCredits: newCredits };
+        setUser(newUser);
+        sessionStorage.setItem('arena_user_state', JSON.stringify(newUser));
+        return earned;
+    };
+
+    const redeemCredits = (rupees) => {
+        if (!user || rupees > (user.arenaCredits || 0)) return false;
+        const newCredits = (user.arenaCredits || 0) - rupees;
+        const newUser = { ...user, arenaCredits: newCredits };
+        setUser(newUser);
+        sessionStorage.setItem('arena_user_state', JSON.stringify(newUser));
+        return true;
     };
 
     // Check for existing session token
     useEffect(() => {
-        const token = sessionStorage.getItem('arena_token');
+    // Restore from saved user state first (supports dummy logins)
+    const userStateStr = sessionStorage.getItem('arena_user_state');
+    if (userStateStr) {
+      try {
+        const savedUser = JSON.parse(userStateStr);
+        if (savedUser && savedUser.role) {
+          setIsLoggedIn(true);
+          setUser(savedUser);
+        }
+      } catch (e) {
+        console.error('Failed to restore user state:', e);
+      }
+    }
+
+    const token = sessionStorage.getItem('arena_token');
         if (token) {
             try {
                 // Correctly extract and decode the JWT payload (2nd part)
@@ -102,7 +138,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, user, isAdmin: user?.role === 'admin', arenaCredits: user?.arenaCredits || 0, getRedeemableValue, earnCredits, redeemCredits, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

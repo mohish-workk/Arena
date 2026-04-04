@@ -51,7 +51,7 @@ const Dashboard = () => {
                                 <CreditCard className="text-primary-light" size={20} />
                                 <span className="text-[10px] uppercase tracking-[0.3em] text-cream/60 font-bold">Arena Credits Wallet</span>
                             </div>
-                            <h2 className="text-3xl md:text-5xl font-bold text-cream tracking-tight">₹ 1,250 <span className="text-xl font-normal opacity-40">Credits</span></h2>
+<h2 className="text-3xl md:text-5xl font-bold text-cream tracking-tight">₹{user?.arenaCredits || 0} <span className="text-xl font-normal opacity-40">Credits</span></h2>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <button className="w-full sm:w-auto bg-cream text-primary px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-cream/90 transition-all shadow-xl">

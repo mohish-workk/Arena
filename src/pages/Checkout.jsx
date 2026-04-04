@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, CreditCard, Lock, CheckCircle2, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useErpCrm } from '../context/ErpCrmContext';
 import { jsPDF } from 'jspdf';
 
@@ -9,15 +10,26 @@ const Checkout = () => {
     const navigate = useNavigate();
     const { cartItems, cartTotal, clearCart } = useCart();
     const { processCartCheckout } = useErpCrm();
+    const { getRedeemableValue, redeemCredits, arenaCredits } = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [purchaseSummary, setPurchaseSummary] = useState([]); // Store what was bought for PDF
     const [purchaseTotal, setPurchaseTotal] = useState(0);
+    const [redeemedRupees, setRedeemedRupees] = useState(0);
+    const [netTotal, setNetTotal] = useState(cartTotal);
     const [billingDetails, setBillingDetails] = useState({
         name: 'Mohish Padave',
         email: 'mohish.padave@ves.ac.in',
         phone: '9999999999'
     });
+
+    useEffect(() => {
+        const maxRedeem = Math.min(cartTotal, getRedeemableValue());
+        if (redeemedRupees > maxRedeem) {
+            setRedeemedRupees(maxRedeem);
+        }
+        setNetTotal(cartTotal - redeemedRupees);
+    }, [cartTotal, redeemedRupees, getRedeemableValue]);
 
     // If cart is empty and not in success state, redirect or show message
     if (cartItems.length === 0 && !isSuccess) {
@@ -56,18 +68,28 @@ const Checkout = () => {
 
         // Save state for receipt before clearing cart
         setPurchaseSummary([...cartItems]);
-        setPurchaseTotal(cartTotal);
+        setPurchaseTotal(netTotal);
+
+        // Redeem credits before payment
+        if (redeemedRupees > 0) {
+            const success = redeemCredits(redeemedRupees);
+            if (!success) {
+                alert('Insufficient credits!');
+                setIsProcessing(false);
+                return;
+            }
+        }
 
         const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Use the Key ID from env variables
-            amount: cartTotal * 100, // Amount is in currency subunits. 
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SBjSdHKEo2wOh6", // Use the Key ID from env variables
+            amount: netTotal * 100, // Amount is in currency subunits. 
             currency: "INR",
             name: "Arena One",
             description: "Premium Student Gear Platform",
             handler: function () {
                 setIsProcessing(false);
                 setIsSuccess(true);
-                processCartCheckout(billingDetails.email, billingDetails.name, cartItems, cartTotal);
+                processCartCheckout(billingDetails.email, billingDetails.name, cartItems, netTotal);
                 clearCart();
             },
             prefill: {
@@ -231,6 +253,30 @@ const Checkout = () => {
                                     />
                                 </div>
 
+<div className="mb-6 p-4 bg-cream/50 rounded-lg border border-secondary/10">
+                                    <div className="flex justify-between text-xs text-secondary/60 mb-2">
+                                        <span>Arena Credits Available</span>
+                                        <span>₹{getRedeemableValue()}</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max={Math.min(cartTotal, getRedeemableValue())}
+                                        value={redeemedRupees}
+                                        onChange={(e) => setRedeemedRupees(Number(e.target.value))}
+                                        className="w-full h-2 bg-secondary/20 rounded-lg appearance-none cursor-pointer accent-primary"
+                                    />
+                                    <div className="flex justify-between text-xs font-bold mt-2">
+                                        <span>₹0</span>
+                                        <span>₹{redeemedRupees}</span>
+                                        <span className="max-w-[60px]">Max</span>
+                                    </div>
+                                    {redeemedRupees > 0 && (
+                                        <div className="text-[9px] text-green-600 font-bold uppercase tracking-wider mt-1 text-center">
+                                            Saving ₹{redeemedRupees} today!
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="pt-6">
                                     <button
                                         disabled={isProcessing}
@@ -248,7 +294,7 @@ const Checkout = () => {
                                             <>
                                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                                                 <Lock size={16} className="relative z-10" />
-                                                <span className="relative z-10">Pay ₹{cartTotal} via Razorpay</span>
+                                                <span className="relative z-10">Pay ₹{netTotal} via Razorpay</span>
                                             </>
                                         )}
                                     </button>
@@ -289,9 +335,15 @@ const Checkout = () => {
                                     <span className="opacity-40">Taxes & Fees</span>
                                     <span className="font-bold">₹0</span>
                                 </div>
+                                {redeemedRupees > 0 && (
+                                    <div className="flex justify-between text-xs text-green-600 font-bold">
+                                        <span>Arena Credits Redeemed</span>
+                                        <span>-₹{redeemedRupees}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-end pt-6 border-t-2 border-primary/20">
                                     <span className="text-[10px] uppercase font-bold tracking-widest text-primary">Total Amount</span>
-                                    <span className="text-3xl font-bold tracking-tighter">₹{cartTotal}</span>
+                                    <span className="text-3xl font-bold tracking-tighter">₹{netTotal}</span>
                                 </div>
                             </div>
 
